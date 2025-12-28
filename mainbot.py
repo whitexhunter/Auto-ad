@@ -4,10 +4,10 @@ import subprocess
 import os
 
 # Replace with your bot token
-BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE'
+BOT_TOKEN = 'MTQ1NDc1NTA2NTk2MDMzNzUzNQ.G_FOra._6hBbcNkCDtiJqi-Eb8TB6mgTwIWhLvbY5F4VI'
 
 # Replace with your Discord user ID to restrict the command
-ALLOWED_USER_ID = 1234567890123456789
+ALLOWED_USER_ID = 999664473101058168
 
 class RunModal(discord.ui.Modal, title="Run Self-Bot"):
     token_input = discord.ui.TextInput(label="Discord Token", placeholder="Enter your user token", required=True)
@@ -63,4 +63,4 @@ async def run_command(interaction: discord.Interaction):
 async def on_ready():
     print(f'Bot logged in as {bot.user}')
 
-bot.run(BOT_TOKEN)
+bot.run(MTQ1NDc1NTA2NTk2MDMzNzUzNQ.G_FOra._6hBbcNkCDtiJqi-Eb8TB6mgTwIWhLvbY5F4VI)
