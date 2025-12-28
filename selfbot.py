@@ -23,7 +23,6 @@ print(f"> Sending every {INTERVAL}s → Channel {CHANNEL_ID}")
 last_dm = None
 SELF_ID = None
 
-
 def get_self_id():
     global SELF_ID
     if SELF_ID:
@@ -36,44 +35,34 @@ def get_self_id():
     SELF_ID = r.json()["id"]
     return SELF_ID
 
-
 def send_message():
     data = {"content": MESSAGE}
-    r = requests.post(f"{API}/channels/{CHANNEL_ID}/messages",
-                      headers=HEADERS, data=json.dumps(data))
-    print("[SEND]", r.status_code, r.text)
-
-    # Handle rate limit
+    r = requests.post(f"{API}/channels/{CHANNEL_ID}/messages", headers=HEADERS, data=json.dumps(data))
+    print(f"[SEND] Status: {r.status_code}, Response: {r.text}")
     if r.status_code == 429:
         delay = r.json().get("retry_after", 5)
         print(f"!! RATE LIMITED — waiting {delay}s")
         time.sleep(delay)
-
+    elif r.status_code != 200:
+        print(f"!! SEND FAILED: {r.status_code} - {r.text}")
 
 def check_dm():
     global last_dm
     r = requests.get(f"{API}/users/@me/channels", headers=HEADERS)
     if r.status_code != 200:
-        print("[DM CHANNELS ERR]", r.status_code, r.text)
+        print(f"[DM CHANNELS ERR] {r.status_code}: {r.text}")
         return
-
     for dm in r.json():
         dm_id = dm["id"]
-        msgs = requests.get(f"{API}/channels/{dm_id}/messages",
-                            headers=HEADERS)
+        msgs = requests.get(f"{API}/channels/{dm_id}/messages", headers=HEADERS)
         if msgs.status_code != 200:
             continue
-
         latest = msgs.json()[0]
         if latest["author"]["id"] != get_self_id() and latest["id"] != last_dm:
-            print("Replying to DM:", latest["content"])
-            requests.post(
-                f"{API}/channels/{dm_id}/messages",
-                headers=HEADERS,
-                data=json.dumps({"content": AUTO_RESPONSE})
-            )
+            print(f"Replying to DM: {latest['content']}")
+            reply_r = requests.post(f"{API}/channels/{dm_id}/messages", headers=HEADERS, data=json.dumps({"content": AUTO_RESPONSE}))
+            print(f"[DM REPLY] Status: {reply_r.status_code}, Response: {reply_r.text}")
             last_dm = latest["id"]
-
 
 # MAIN LOOP
 while True:
