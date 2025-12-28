@@ -37,16 +37,11 @@ class RunModal(discord.ui.Modal, title="Run Self-Bot"):
                 "AUTO_RESPONSE_TEXT": self.auto_response_input.value
             })
 
-            # Launch subprocess and capture output for debugging
-            process = subprocess.Popen(["python3", "selfbot.py"], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            stdout, stderr = process.communicate(timeout=10)  # Wait up to 10 seconds
-            print(f"Subprocess stdout: {stdout}")
-            print(f"Subprocess stderr: {stderr}")
+            # Launch subprocess without waiting (detached)
+            subprocess.Popen(["python3", "selfbot.py"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print("Self-bot subprocess launched successfully")
 
             await interaction.response.send_message("Self-bot started successfully and is now running in background!", ephemeral=True)
-        except subprocess.TimeoutExpired:
-            print("Subprocess timed out")
-            await interaction.response.send_message("Self-bot launch timed out. Check inputs.", ephemeral=True)
         except Exception as e:
             print(f"Error launching self-bot: {e}")
             await interaction.response.send_message(f"Error launching self-bot: {e}", ephemeral=True)
