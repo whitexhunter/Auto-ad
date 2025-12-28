@@ -18,7 +18,7 @@ class RunModal(discord.ui.Modal, title="Run Self-Bot"):
 
     async def on_submit(self, interaction: discord.Interaction):
         print(f"Raw channel_id_input: '{self.channel_id_input.value}' (length: {len(self.channel_id_input.value)})")
-print(f"Raw interval_input: '{self.interval_input.value}' (length: {len(self.interval_input.value)})")
+        print(f"Raw interval_input: '{self.interval_input.value}' (length: {len(self.interval_input.value)})")
         try:
             channel_id = int(self.channel_id_input.value)
             interval = int(self.interval_input.value)
