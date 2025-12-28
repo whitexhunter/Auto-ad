@@ -14,6 +14,8 @@ class RunModal(discord.ui.Modal, title="Run Self-Bot"):
     auto_response_input = discord.ui.TextInput(label="Auto-Response Text", placeholder="DM reply text", required=False, default="This is an auto-response.")
 
     async def on_submit(self, interaction: discord.Interaction):
+        print(f"Raw channel_id: '{self.channel_id_input.value}'")
+        print(f"Raw interval: '{self.interval_input.value}'")
         try:
             channel_id = int(self.channel_id_input.value)
             interval = int(self.interval_input.value)
@@ -33,7 +35,10 @@ class RunModal(discord.ui.Modal, title="Run Self-Bot"):
                 "AUTO_RESPONSE_TEXT": self.auto_response_input.value
             })
 
-            subprocess.Popen(["python3", "selfbot.py"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            process = subprocess.Popen(["python3", "selfbot.py"], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            stdout, stderr = process.communicate(timeout=10)
+            print(f"Subprocess stdout: {stdout}")
+            print(f"Subprocess stderr: {stderr}")
 
             await interaction.response.send_message("Self-bot started successfully and is now running in background!", ephemeral=True)
         except Exception as e:
