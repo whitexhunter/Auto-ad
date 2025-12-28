@@ -3,11 +3,15 @@ import time
 import os
 import json
 
+print("[DEBUG] selfbot.py started - importing modules")
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
 MESSAGE = os.getenv("MESSAGE_TEXT")
 INTERVAL = int(os.getenv("INTERVAL_SECONDS", 10))
 AUTO_RESPONSE = os.getenv("AUTO_RESPONSE_TEXT")
+
+print(f"[DEBUG] Env vars loaded - TOKEN: {TOKEN[:10]}..., CHANNEL_ID: {CHANNEL_ID}, INTERVAL: {INTERVAL}")
 
 API = "https://discord.com/api/v9"
 
