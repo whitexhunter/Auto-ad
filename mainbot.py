@@ -76,5 +76,3 @@ async def on_ready():
 print(f'Bot logged in as {bot.user}')
 
 bot.run(BOT_TOKEN)
-
-Fix whole code
