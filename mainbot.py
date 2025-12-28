@@ -19,29 +19,37 @@ class RunModal(discord.ui.Modal, title="Run Self-Bot"):
     auto_response_input = discord.ui.TextInput(label="Auto-Response Text", placeholder="DM response", required=False, default="This is an auto-response.")
 
     async def on_submit(self, interaction: discord.Interaction):
-        try:
-            channel_id = int(self.channel_id_input.value)
-            interval = int(self.interval_input.value)
-            if interval < 1:
-                raise ValueError
-        except ValueError:
-            await interaction.response.send_message("Invalid channel ID or interval. Please try again.", ephemeral=True)
-            return
+    try:
+        channel_id = int(self.channel_id_input.value)
+        interval = int(self.interval_input.value)
+        if interval < 1:
+            raise ValueError
+    except ValueError:
+        await interaction.response.send_message("Invalid channel ID or interval. Please try again.", ephemeral=True)
+        return
 
-        try:
-            env = os.environ.copy()
-            env.update({
-                'DISCORD_TOKEN': self.token_input.value,
-                'CHANNEL_ID': str(channel_id),
-                'MESSAGE_TEXT': self.message_input.value,
-                'INTERVAL_SECONDS': str(interval),
-                'AUTO_RESPONSE_TEXT': self.auto_response_input.value
-            })
-            subprocess.Popen(['python', 'selfbot.py'], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            await interaction.response.send_message("Self-bot launched successfully! It will run in the background.", ephemeral=True)
-        except Exception as e:
-            await interaction.response.send_message(f"Error launching self-bot: {str(e)}", ephemeral=True)
-
+    try:
+        env = os.environ.copy()
+        env.update({
+            'DISCORD_TOKEN': self.token_input.value,
+            'CHANNEL_ID': str(channel_id),
+            'MESSAGE_TEXT': self.message_input.value,
+            'INTERVAL_SECONDS': str(interval),
+            'AUTO_RESPONSE_TEXT': self.auto_response_input.value
+        })
+        print(f"Launching self-bot with TOKEN: {self.token_input.value[:10]}..., CHANNEL_ID: {channel_id}, MESSAGE: {self.message_input.value}")
+        process = subprocess.Popen(['python', 'selfbot.py'], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout, stderr = process.communicate(timeout=5)  # Wait up to 5 seconds for output
+        print(f"Subprocess stdout: {stdout}")
+        print(f"Subprocess stderr: {stderr}")
+        await interaction.response.send_message("Self-bot launched successfully! It will run in the background.", ephemeral=True)
+    except subprocess.TimeoutExpired:
+        print("Subprocess timed out")
+        await interaction.response.send_message("Self-bot launch timed out. Check inputs.", ephemeral=True)
+    except Exception as e:
+        print(f"Error launching self-bot: {str(e)}")
+        await interaction.response.send_message(f"Error launching self-bot: {str(e)}", ephemeral=True)
+        
 class MyBot(discord.Client):
     def __init__(self):
         intents = discord.Intents.default()
