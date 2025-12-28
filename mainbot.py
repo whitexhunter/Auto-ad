@@ -4,7 +4,7 @@ import subprocess
 import os
 
 # Replace with your bot token
-BOT_TOKEN = 'MTQ1NDc1NTA2NTk2MDMzNzUzNQ.G_FOra._6hBbcNkCDtiJqi-Eb8TB6mgTwIWhLvbY5F4VI'
+BOT_TOKEN = 'BOT_TOKEN'
 
 # Replace with your Discord user ID to restrict the command
 ALLOWED_USER_ID = 999664473101058168
@@ -63,4 +63,4 @@ async def run_command(interaction: discord.Interaction):
 async def on_ready():
     print(f'Bot logged in as {bot.user}')
 
-bot.run(MTQ1NDc1NTA2NTk2MDMzNzUzNQ.G_FOra._6hBbcNkCDtiJqi-Eb8TB6mgTwIWhLvbY5F4VI)
+bot.run(BOT_TOKEN)
