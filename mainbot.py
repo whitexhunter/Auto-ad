@@ -4,7 +4,9 @@ import subprocess
 import os
 
 # Replace with your bot token
-BOT_TOKEN = 'BOT_TOKEN'
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+print("BOT_TOKEN:", BOT_TOKEN)   
+# TEMP – for debugging
 
 # Replace with your Discord user ID to restrict the command
 ALLOWED_USER_ID = 999664473101058168
