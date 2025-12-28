@@ -38,7 +38,7 @@ class RunModal(discord.ui.Modal, title="Run Self-Bot"):
             })
 
             # Launch subprocess without waiting (detached)
-            subprocess.Popen(["python3", "selfbot.py"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen(["python3", "selfbot.py"], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print("Self-bot subprocess launched successfully")
 
             await interaction.response.send_message("Self-bot started successfully and is now running in background!", ephemeral=True)
