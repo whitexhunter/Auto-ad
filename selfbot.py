@@ -1,6 +1,7 @@
 import requests
 import time
 import os
+import json
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
@@ -9,50 +10,77 @@ INTERVAL = int(os.getenv("INTERVAL_SECONDS", 10))
 AUTO_RESPONSE = os.getenv("AUTO_RESPONSE_TEXT")
 
 API = "https://discord.com/api/v9"
-HEADERS = {"Authorization": TOKEN, "Content-Type": "application/json"}
 
-print("[SELF-BOT] Running...")
-print(f"→ Sending every {INTERVAL}s to channel {CHANNEL_ID}")
+HEADERS = {
+    "Authorization": TOKEN,
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+}
+
+print("[SELF-BOT] Started!")
+print(f"> Sending every {INTERVAL}s → Channel {CHANNEL_ID}")
 
 last_dm = None
+SELF_ID = None
+
+
+def get_self_id():
+    global SELF_ID
+    if SELF_ID:
+        return SELF_ID
+
+    r = requests.get(f"{API}/users/@me", headers=HEADERS)
+    if r.status_code != 200:
+        print("!! FAILED GET SELF ID:", r.status_code, r.text)
+        return None
+    SELF_ID = r.json()["id"]
+    return SELF_ID
+
 
 def send_message():
-    r = requests.post(
-        f"{API}/channels/{CHANNEL_ID}/messages",
-        headers=HEADERS,
-        json={"content": MESSAGE}
-    )
-    print("Message:", r.status_code)
+    data = {"content": MESSAGE}
+    r = requests.post(f"{API}/channels/{CHANNEL_ID}/messages",
+                      headers=HEADERS, data=json.dumps(data))
+    print("[SEND]", r.status_code, r.text)
 
-def get_self():
-    u = requests.get(f"{API}/users/@me", headers=HEADERS)
-    if u.status_code != 200:
-        return None
-    return u.json()["id"]
+    # Handle rate limit
+    if r.status_code == 429:
+        delay = r.json().get("retry_after", 5)
+        print(f"!! RATE LIMITED — waiting {delay}s")
+        time.sleep(delay)
 
-SELF_ID = get_self()
 
-def auto_reply():
+def check_dm():
     global last_dm
     r = requests.get(f"{API}/users/@me/channels", headers=HEADERS)
     if r.status_code != 200:
+        print("[DM CHANNELS ERR]", r.status_code, r.text)
         return
 
     for dm in r.json():
         dm_id = dm["id"]
-        msgs = requests.get(f"{API}/channels/{dm_id}/messages", headers=HEADERS).json()
-        latest = msgs[0]
+        msgs = requests.get(f"{API}/channels/{dm_id}/messages",
+                            headers=HEADERS)
+        if msgs.status_code != 200:
+            continue
 
-        if latest["author"]["id"] != SELF_ID and latest["id"] != last_dm:
-            print("Replying to DM…")
+        latest = msgs.json()[0]
+        if latest["author"]["id"] != get_self_id() and latest["id"] != last_dm:
+            print("Replying to DM:", latest["content"])
             requests.post(
                 f"{API}/channels/{dm_id}/messages",
                 headers=HEADERS,
-                json={"content": AUTO_RESPONSE}
+                data=json.dumps({"content": AUTO_RESPONSE})
             )
             last_dm = latest["id"]
 
+
+# MAIN LOOP
 while True:
-    send_message()
-    auto_reply()
+    try:
+        send_message()
+        check_dm()
+    except Exception as e:
+        print("!! ERROR:", e)
+
     time.sleep(INTERVAL)
