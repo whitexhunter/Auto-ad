@@ -29,4 +29,4 @@ async def on_message(message):
     if isinstance(message.channel, discord.DMChannel):
         await message.channel.send(AUTO_RESPONSE_TEXT)
 
-client.run(TOKEN)
+client.run(DISCORD_TOKEN)
